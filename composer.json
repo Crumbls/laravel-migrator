@@ -1,0 +1,58 @@
+{
+    "name": "crumbls/laravel-migrator",
+    "description": "A Laravel Migration Tool",
+    "keywords": [
+        "crumbls",
+        "laravel",
+        "wordpress",
+        "filament",
+        "export",
+        "import"
+    ],
+    "homepage": "https://github.com/crumbls/laravel-migrator",
+    "authors": [
+        {
+            "name": "Chase C. Miller",
+            "email": "chase@crumbls.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "laravel/framework": "^11.9",
+        "nette/php-generator": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Crumbls\\Migrator\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Crumbls\\Migrator\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
+        "baseline": "vendor/bin/phpstan --generate-baseline",
+
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest coverage"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Crumbls\\Migrator\\MigratorServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
