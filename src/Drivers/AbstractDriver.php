@@ -5,6 +5,7 @@ namespace Crumbls\Migrator\Drivers;
 use Crumbls\Migrator\Contracts\DriverInterface;
 use Crumbls\Migrator\DataMappers\Column;
 use Crumbls\Migrator\DataMappers\Table;
+use Crumbls\Migrator\Models\Migrator;
 use Illuminate\Database\Eloquent\Model;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Literal;
@@ -24,6 +25,18 @@ use Illuminate\Support\Str;
  */
 abstract class AbstractDriver implements DriverInterface {
 	abstract public function getModelTables(string $env) : array;
+	abstract public function generateTables() : void;
+
+	protected Migrator $record;
+
+	/**
+	 * @param array $config
+	 * @return $this
+	 */
+	public function initialize(Migrator $record) : self {
+		$this->record = $record;
+		return $this;
+	}
 
 	/**
 	 * TODO: Add in Filament detection and appropriate exceptions.

@@ -3,6 +3,8 @@
 
 namespace Crumbls\Migrator\Commands;
 
+use Crumbls\Migrator\Jobs\MigratorCreated;
+use Crumbls\Migrator\Models\Migrator;
 use Illuminate\Console\Command;;
 use Config;
 use DB;
@@ -30,6 +32,11 @@ class Migrate extends Command
      */
     public function handle()
     {
+
+		$record = Migrator::inRandomOrder()->take(1)->first();
+	    MigratorCreated::dispatchSync($record);
+		dd($record);
+
 		throw new \Exception('Sorry, we are not including this command yet.  It is here just for testing.');
 
 	    $choice = $this->argument('type');
@@ -106,7 +113,7 @@ dd($method);
 		}
 
 		$migrator = app('crumbls-migrator');
-
+return;
 		$migrator
 			->driver('database')
 			->initialize([])

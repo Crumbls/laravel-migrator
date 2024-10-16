@@ -5,6 +5,7 @@ namespace Crumbls\Migrator\Managers;
 use Crumbls\Migrator\Drivers\DatabaseDriver;
 use Crumbls\Migrator\Drivers\RegexXmlDriver;
 use Crumbls\Migrator\Drivers\SimpleXmlDriver;
+use Crumbls\Migrator\Drivers\WordPressDatabaseDriver;
 use Crumbls\Migrator\Drivers\XmlDriver;
 use Illuminate\Support\Manager;
 class MigrationManager extends Manager {
@@ -25,4 +26,9 @@ class MigrationManager extends Manager {
 	{
 		return new DatabaseDriver();
 	}
+
+	public function createDatabaseWordpressDriver() {
+		return new WordPressDatabaseDriver();
+	}
+
 }

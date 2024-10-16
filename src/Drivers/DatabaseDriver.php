@@ -2,11 +2,13 @@
 
 namespace Crumbls\Migrator\Drivers;
 
+use Crumbls\Migrator\Commands\Migrate;
 use Crumbls\Migrator\Contracts\DriverInterface;
 use Crumbls\Migrator\DataMappers\Column;
 use Crumbls\Migrator\DataMappers\Container;
 use Crumbls\Migrator\DataMappers\Table;
 
+use Crumbls\Migrator\Models\Migrator;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,16 +25,19 @@ class DatabaseDriver extends AbstractDriver {
 
 	private string $connection;
 
+
+	private array $_sourceTables;
+
 	/**
 	 * @var array
 	 */
 	protected array $containers;
 
-	/**
-	 * @param array $config
-	 * @return $this
-	 */
-	public function initialize(array $config) : self {
+	public function initialize(Migrator $record) : self {
+		parent::initialize($record);
+		if (!isset($this->connection) || !$this->connection) {
+			$this->connection($record->source);
+		}
 		return $this;
 	}
 
@@ -41,6 +46,54 @@ class DatabaseDriver extends AbstractDriver {
 	 */
 	protected function getConnectionPrefix() : string|null {
 		return Config::get('database.connections.'.$this->connection.'.prefix');
+	}
+
+	/**
+	 * Tables that are excluded during migration.
+	 * @return array
+	 */
+	public function getExcludedTables() : array {
+		return [];
+	}
+
+	public function generateTables(): void {
+		if (!isset($this->connection)) {
+			throw new \Exception('Connection not defined.');
+		}
+		collect($this->getSourceTables())
+			->diff($this->record->tables->pluck('name'))
+			->diff($this->getExcludedTables())
+			->each(function($tableName) {
+				$method = \Str::camel('generateTable'.ucfirst($tableName));
+				if (method_exists($this, $method) && is_callable([$this, $method])) {
+					$this->$method();
+				} else {
+					echo $method.PHP_EOL;
+					$table = $this->record->tables()->create([
+						'name' => $tableName,
+						'source' => $tableName
+					]);
+					foreach(Schema::connection($this->record->source)
+						        ->getColumns($tableName) as $col) {
+						$col['source'] = $col['name'];
+						$table->columns()->create($col);
+					}
+				}
+			});
+	}
+
+	protected function getSourceTables() : array {
+		if (isset($this->_sourceTables)) {
+			return $this->_sourceTables;
+		}
+		/**
+		 * Get all tables.
+		 */
+		$prefix = config('database.connections.'.$this->connection.'.prefix');
+		$this->_sourceTables = array_map(function($table) use ($prefix) {
+			return Str::chopStart($table['name'], $prefix);
+		}, Schema::connection($this->connection)->getTables());
+		return $this->_sourceTables;
 	}
 
 	public function parse() {
